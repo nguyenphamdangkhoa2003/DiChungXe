@@ -1,43 +1,36 @@
-// models/user.model.js
 import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema(
     {
         name: {
             type: String,
-            required: [true, 'Tên đầy đủ của người dùng là bắt buộc.'],
+            required: [true, 'Full name is required.'],
         },
         email: {
             type: String,
-            required: [true, 'Địa chỉ email là bắt buộc.'],
+            required: [true, 'Email address is required.'],
             unique: true,
             match: [
                 /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-                'Địa chỉ email không hợp lệ.',
+                'Invalid email address.',
             ],
         },
         phone: {
             type: String,
-            required: [true, 'Số điện thoại là bắt buộc.'],
             unique: true,
             match: [
                 /^\+?[0-9]{1,4}[-\s]?[0-9]{2,4}[-\s]?[0-9]{6,8}$/,
-                'Số điện thoại không hợp lệ.',
+                'Invalid phone number.',
             ],
         },
         password: {
             type: String,
-            required: [true, 'Mật khẩu là bắt buộc.'],
             select: false,
-            match: [
-                /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-                'Mật khẩu phải chứa ít nhất 8 ký tự, bao gồm ít nhất một chữ cái viết hoa, một chữ cái viết thường, một số và một ký tự đặc biệt.',
-            ],
         },
         role: {
             type: String,
-            required: [true, 'Vai trò là bắt buộc.'],
             enum: ['driver', 'passenger', 'admin'],
+            default: 'passenger',
         },
         profile_image: {
             type: String,
@@ -50,7 +43,7 @@ const userSchema = new mongoose.Schema(
                     default: false,
                 },
             ],
-            default: [false, false], // [phone, email]
+            default: [false, false],
         },
         driver_info: {
             car_plate: {
@@ -72,8 +65,8 @@ const userSchema = new mongoose.Schema(
         },
         rating: {
             type: Number,
-            min: [0, 'Đánh giá không được nhỏ hơn 0.'],
-            max: [5, 'Đánh giá không được lớn hơn 5.'],
+            min: [0, 'Rating cannot be less than 0.'],
+            max: [5, 'Rating cannot be greater than 5.'],
             default: 0,
         },
         date_of_birth: {
@@ -93,6 +86,11 @@ const userSchema = new mongoose.Schema(
             type: String,
             enum: ['male', 'female'],
         },
+        resetPasswordToken: String,
+        resetPasswordExpiresAt: Date,
+        verificationToken: String,
+        verificationTokenExpiresAt: Date,
+        google_id: String,
     },
     { timestamps: true }
 );
