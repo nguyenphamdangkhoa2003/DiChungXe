@@ -1,0 +1,59 @@
+Folder PATH listing for volume LearnCode
+Volume serial number is 623E-626D
+K:.
+|   .env
+|   .gitignore
+|   package.json
+|   pnpm-lock.yaml
+|   tree.txt
+|         
+\---src
+    |   app.js
+    |   server.js
+    |   
+    +---api
+    |   +---admin
+    |   |   \---user
+    |   |           user.controller.js
+    |   |           user.route.js
+    |   |           user.service.js
+    |   |           user.validation.js
+    |   |           
+    |   +---auth
+    |   |       auth.controller.js
+    |   |       auth.route.js
+    |   |       auth.service.js
+    |   |       auth.validation.js
+    |   |       
+    |   \---user
+    |           user.controller.js
+    |           user.route.js
+    |           user.service.js
+    |           user.validation.js
+    |           
+    +---config
+    |       cloundinary.config.js
+    |       db.config.js
+    |       passport.config.js
+    |       
+    +---docs
+    |       API DiChungXe.postman_collection.json
+    |       �i Xe Chung documentation.pdf
+    |       
+    +---Mail
+    |       emails.js
+    |       emailTemplates.js
+    |       
+    +---middleware
+    |       errorHandler.js
+    |       isAdmin.js
+    |       validate.js
+    |       verifyToken.js
+    |       
+    +---models
+    |       user.model.js
+    |       
+    \---utils
+            appError.js
+            authUtil.js
+            

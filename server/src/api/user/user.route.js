@@ -7,15 +7,15 @@ import { storage } from '../../config/cloundinary.config.js';
 import multer from 'multer';
 
 const upload = multer({ storage }); 
-const route = express.Router();
+const router = express.Router();
 
-route.get('/me', verifyToken, getUser);
-route.put(
+router.get('/me', verifyToken, getUser);
+router.put(
     '/me',
     verifyToken,
     upload.single('profile_image'),
     validate(updateUserSchema),
     updateUser
 );
-route.delete('/me', verifyToken, deleteUser);
-export default route;
+router.delete('/me', verifyToken, deleteUser);
+export default router;
