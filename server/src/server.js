@@ -8,7 +8,6 @@ dotenv.config({ path: './.env' });
 
 // Database connection
 connectDB();
-
 // Handle uncaught exceptions
 process.on('uncaughtException', (err) => {
   console.error('UNCAUGHT EXCEPTION! 💥 Shutting down...');
