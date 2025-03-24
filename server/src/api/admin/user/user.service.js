@@ -1,5 +1,6 @@
 import User from '../../../models/user.model.js';
-import { json2csv } from 'json-2-csv';
+import ExcelJS from 'exceljs';
+import fs from 'fs';
 
 // Lấy danh sách tất cả người dùng (có phân trang)
 export const getAllUsersService = async (query) => {
@@ -97,41 +98,163 @@ export const getUsersByRoleService = async (role, query) => {
     };
 };
 
-export const exportUsersService = async (format = 'csv') => {
+export const exportUsersService = async (format = 'xlsx') => {
     try {
-        const users = await User.find()
-            .select('-password -__v -refreshToken')
-            .lean();
+        const users = await User.find(); // Lấy dữ liệu từ MongoDB
 
-        if (!users.length) {
-            throw new Error('No users found for export');
-        }
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Users');
 
-        if (format === 'json') {
-            return {
-                data: JSON.stringify(users, null, 2),
-                meta: {
-                    exportedCount: users.length,
-                    format,
-                },
-            };
-        }
+        const headerStyle = {
+            font: { bold: true, color: { argb: 'FFFFFF' }, size: 12 },
+            fill: {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: '4472C4' },
+            },
+            alignment: {
+                horizontal: 'center',
+                vertical: 'middle',
+                wrapText: true,
+            },
+            border: {
+                top: { style: 'thin', color: { argb: '000000' } },
+                left: { style: 'thin', color: { argb: '000000' } },
+                bottom: { style: 'thin', color: { argb: '000000' } },
+                right: { style: 'thin', color: { argb: '000000' } },
+            },
+        };
 
-        const csv = await json2csv(users, {
-            excludeKeys: ['_id', 'createdAt', 'updatedAt'],
-            emptyFieldValue: '',
+        const dataStyle = {
+            font: { size: 11 },
+            alignment: { vertical: 'middle', horizontal: 'left' },
+            border: {
+                top: { style: 'thin', color: { argb: 'D9D9D9' } },
+                left: { style: 'thin', color: { argb: 'D9D9D9' } },
+                bottom: { style: 'thin', color: { argb: 'D9D9D9' } },
+                right: { style: 'thin', color: { argb: 'D9D9D9' } },
+            },
+        };
+
+        const statusStyle = (isActive) => ({
+            font: {
+                color: { argb: isActive ? '00B050' : 'FF0000' },
+                bold: true,
+            },
         });
 
+        worksheet.mergeCells('A1:H1');
+        const titleRow = worksheet.getCell('A1');
+        titleRow.value = 'DANH SÁCH NGƯỜI DÙNG HỆ THỐNG';
+        titleRow.font = {
+            size: 18,
+            bold: true,
+            color: { argb: 'FFFFFF' },
+            name: 'Arial',
+        };
+        titleRow.alignment = {
+            horizontal: 'center',
+            vertical: 'middle',
+        };
+        titleRow.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: '2F5597' },
+        };
+
+        worksheet.mergeCells('A2:H2');
+        const dateRow = worksheet.getCell('A2');
+        dateRow.value = `Ngày xuất: ${new Date().toLocaleDateString('vi-VN')}`;
+        dateRow.font = { italic: true };
+        dateRow.alignment = { horizontal: 'right' };
+
+        const headerRow = worksheet.addRow([
+            'STT',
+            'ID Người dùng',
+            'Họ và tên',
+            'Email',
+            'Số điện thoại',
+            'Vai trò',
+            'Trạng thái',
+            'Ngày đăng ký',
+        ]);
+
+        headerRow.eachCell((cell) => {
+            Object.assign(cell, headerStyle);
+        });
+
+        users.forEach((user, index) => {
+            const row = worksheet.addRow([
+                index + 1,
+                user._id.toString(),
+                user.name,
+                user.email,
+                user.phone || 'N/A',
+                user.role.toUpperCase(),
+                user.isActive ? 'Hoạt động' : 'Không hoạt động',
+                new Date(user.createdAt).toLocaleDateString('vi-VN'),
+            ]);
+
+            row.eachCell((cell) => {
+                Object.assign(cell, dataStyle);
+            });
+
+            const statusCell = row.getCell(7);
+            Object.assign(statusCell, statusStyle(user.isActive));
+            statusCell.alignment = { horizontal: 'center' };
+
+            const roleCell = row.getCell(6);
+            roleCell.alignment = { horizontal: 'center' };
+
+            const sttCell = row.getCell(1);
+            sttCell.alignment = { horizontal: 'center' };
+        });
+
+        worksheet.columns = [
+            { key: 'stt', width: 8 }, // STT
+            { key: 'id', width: 28 }, // ID
+            { key: 'name', width: 25 }, // Tên
+            { key: 'email', width: 30 }, // Email
+            { key: 'phone', width: 15 }, // SĐT
+            { key: 'role', width: 15 }, // Vai trò
+            { key: 'status', width: 15 }, // Trạng thái
+            { key: 'createdAt', width: 15 }, // Ngày tạo
+        ];
+
+        const footerRow = worksheet.addRow([
+            `Tổng số người dùng: ${users.length}`,
+        ]);
+        footerRow.getCell(1).font = { bold: true };
+        worksheet.mergeCells(`A${footerRow.number}:H${footerRow.number}`);
+
+        const lastRow = worksheet.lastRow.number;
+        worksheet.eachRow((row, rowNumber) => {
+            if (rowNumber > 2) {
+                // Bỏ qua 2 dòng tiêu đề
+                row.eachCell((cell) => {
+                    cell.border = {
+                        top: { style: 'thin', color: { argb: '000000' } },
+                        left: { style: 'thin', color: { argb: '000000' } },
+                        bottom: { style: 'thin', color: { argb: '000000' } },
+                        right: { style: 'thin', color: { argb: '000000' } },
+                    };
+                });
+            }
+        });
+
+        const filePath = 'users_export.xlsx';
+        await workbook.xlsx.writeFile(filePath);
+
         return {
-            data: csv,
+            data: fs.readFileSync(filePath),
             meta: {
                 exportedCount: users.length,
                 format,
+                exportedAt: new Date().toISOString(),
             },
         };
     } catch (error) {
-        console.error('Export service error:', error);
-        throw new Error(`Export failed: ${error.message}`);
+        throw new Error('Lỗi khi xuất dữ liệu người dùng: ' + error.message);
     }
 };
 
