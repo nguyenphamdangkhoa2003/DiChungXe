@@ -6,7 +6,7 @@ import {
 
 export const getUser = async (req, res, next) => {
     try {
-        const user = await getUserService(req.userId);
+        const user = await getUserService(req.user._id);
         res.status(200).json({
             success: true,
             data: {
@@ -25,7 +25,7 @@ export const getUser = async (req, res, next) => {
 export const updateUser = async (req, res) => {
     try {
         const updatedUser = await updateUserService(
-            req.userId,
+            req.user._id,
             req.body,
             req.file
         );
@@ -43,7 +43,7 @@ export const updateUser = async (req, res) => {
 
 export const deleteUser = async (req, res) => {
     try {
-        await deleteUserService(req.userId);
+        await deleteUserService(req.user._id);
         res.status(200).json({ message: 'User deleted successfully' });
     } catch (error) {
         res.status(400).json({ message: error.message });

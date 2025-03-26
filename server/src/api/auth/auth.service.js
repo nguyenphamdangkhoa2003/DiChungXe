@@ -76,7 +76,7 @@ export const verifyEmailUser = async (code) => {
     throw new AppError("Invalid or expired verification code", 400);
   }
 
-  user.verified[0] = true;
+  user.verified.email = true;
   user.verificationToken = undefined;
   user.verificationTokenExpiresAt = undefined;
 

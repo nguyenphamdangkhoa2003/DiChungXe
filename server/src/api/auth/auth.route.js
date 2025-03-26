@@ -17,9 +17,8 @@ import {
     updatePasswordSchema,
     completeProfileSchema,
 } from './auth.validation.js';
-import validate from '../../middleware/validate.js';
-import { verifyToken } from '../../middleware/verifyToken.js';
-
+import validate from '../../middleware/validate.middleware.js';
+import { protect } from '../../middleware/auth.middleware.js';
 const router = express.Router();
 
 router.post('/register', validate(registerSchema), register);
@@ -34,7 +33,7 @@ router.post(
     resetPassword
 );
 
-router.get('/check-auth', verifyToken, checkAuth);
+router.get('/check-auth', protect, checkAuth);
 
 router.get(
     '/google',
@@ -52,5 +51,9 @@ router.get(
     }
 );
 
-router.post("/complete-profile", validate(completeProfileSchema), completeProfile);
+router.post(
+    '/complete-profile',
+    validate(completeProfileSchema),
+    completeProfile
+);
 export default router;

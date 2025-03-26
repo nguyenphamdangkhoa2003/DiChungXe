@@ -7,8 +7,9 @@ import cookieParser from 'cookie-parser';
 import MongoStore from 'connect-mongo';
 import authRouter from './api/auth/auth.route.js';
 import userRouter from './api/user/user.route.js';
-import adminRouter from './api/admin/user/user.route.js';
-import { errorHandler } from './middleware/errorHandler.js';
+import tripRouter from './api/trip/trip.route.js';
+import adminUserRouter from './api/admin/user/user.route.js';
+import { errorHandler } from './middleware/errorHandler.middleware.js';
 import mongoSanitize from 'express-mongo-sanitize';
 import rateLimit from 'express-rate-limit';
 import xssClean from 'xss-clean';
@@ -60,7 +61,8 @@ app.get('/', (req, res) => {
 
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/user', userRouter);
-app.use('/api/v1/admin', adminRouter);
+app.use('/api/v1/admin', adminUserRouter);
+app.use('/api/v1/trips', tripRouter);
 app.use(errorHandler);
 
 export default app;

@@ -17,45 +17,32 @@ import {
     createUserSchema,
     updateUserSchema,
 } from './user.validation.js';
-import isAdmin from '../../../middleware/isAdmin.js';
-import validate from '../../../middleware/validate.js';
-import { verifyToken } from '../../../middleware/verifyToken.js';
-import multer from 'multer';
+import validate from '../../../middleware/validate.middleware.js';
+import { protect } from '../../../middleware/auth.middleware.js';
 import { storage } from '../../../config/cloundinary.config.js';
+import multer from 'multer';
 
 const upload = multer({ storage });
 const router = express.Router();
-router.get('/users/export', verifyToken, isAdmin, exportUsers);
-router.get('/users/search', verifyToken, isAdmin, searchUsers);
+router.use(protect);
 
-router.get('/users', verifyToken, isAdmin, getAllUsers);
+router.get('/users/export', exportUsers);
+router.get('/users/search', searchUsers);
 
-router.get('/users/role/:role', verifyToken, isAdmin, getUsersByRole);
+router.get('/users', getAllUsers);
 
-router.get('/users/:id', verifyToken, isAdmin, getUserById);
-router.post(
-    '/users',
-    verifyToken,
-    isAdmin,
-    validate(createUserSchema),
-    createUser
-);
+router.get('/users/role/:role', getUsersByRole);
+
+router.get('/users/:id', getUserById);
+router.post('/users', validate(createUserSchema), createUser);
 router.put(
     '/users/:id',
-    verifyToken,
-    isAdmin,
     validate(updateUserSchema),
     upload.single('profile_image'),
     updateUser
 );
-router.delete('/users/:id', verifyToken, isAdmin, deleteUser);
-router.patch(
-    '/users/:id/role',
-    verifyToken,
-    isAdmin,
-    validate(changeRoleUserSchema),
-    changeUserRole
-);
-router.patch('/users/:id/status', verifyToken, isAdmin, toggleUserStatus);
+router.delete('/users/:id', deleteUser);
+router.patch('/users/:id/role', validate(changeRoleUserSchema), changeUserRole);
+router.patch('/users/:id/status', toggleUserStatus);
 
 export default router;

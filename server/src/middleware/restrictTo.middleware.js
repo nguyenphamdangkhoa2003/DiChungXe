@@ -1,5 +1,5 @@
 import User from '../models/user.model.js';
-const isAdmin = async (req, res, next) => {
+const restrictTo = async (req, res, next) => {
     const user = await User.findById(req.userId);
     const allowedRoles = ['admin']; 
 

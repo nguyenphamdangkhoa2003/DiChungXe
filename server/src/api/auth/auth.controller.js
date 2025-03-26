@@ -33,11 +33,11 @@ export const login = async (req, res) => {
     try {
         const { user, token } = await loginUser(req.body);
 
-        res.cookie("token", token, {
+        res.cookie('token', token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
-            maxAge: 15 * 24 * 60 * 60 * 1000
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 15 * 24 * 60 * 60 * 1000,
         });
 
         res.status(200).json({
@@ -87,7 +87,10 @@ export const forgotPassword = async (req, res, next) => {
 
 export const resetPassword = async (req, res, next) => {
     try {
-        const { message } = await resetPasswordUser(req.params.token, req.body.password);
+        const { message } = await resetPasswordUser(
+            req.params.token,
+            req.body.password
+        );
         res.status(200).json({
             success: true,
             message,
@@ -99,7 +102,7 @@ export const resetPassword = async (req, res, next) => {
 
 export const checkAuth = async (req, res, next) => {
     try {
-        const { user } = await checkAuthUser(req.userId);
+        const { user } = await checkAuthUser(req.user._id);
         res.status(200).json({
             success: true,
             user,
